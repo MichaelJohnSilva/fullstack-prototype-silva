@@ -38,3 +38,10 @@
 .btn:hover i {
   opacity: 0.8;
 }
+
+/* Make Edit button compact */ 
+.edit-btn { 
+  width: 100px; /* fixed width */
+  justify-content: center; /* keep icon + text aligned left */
+ }
+
