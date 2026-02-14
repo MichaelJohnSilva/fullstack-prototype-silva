@@ -2,32 +2,825 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Full-Stack App (Student Build)</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Full-Stack App (Michael John W.Silva)</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    /* Shared CSS Rules */
+    .page { display: none; }
+    .page.active { display: block; }
+    body.not-authenticated .role-logged-in { display: none; }
+    body.authenticated .role-logged-out { display: none; }
+    .role-admin { display: none; }
+    body.is-admin .role-admin { display: block; }
+  </style>
 </head>
-<body>
+<body class="not-authenticated">
+  <!-- Navbar -->
   <nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Full-Stack App (Michael John W. Silva)</a>
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-        <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Full-Stack App (Michael John W.Silva)</a>
+    <div class="dropdown ms-auto role-logged-in">
+      <button class="btn btn-secondary dropdown-toggle" id="navDropdown" data-bs-toggle="dropdown">
+        <span id="userRole">Admin</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="#/profile">Profile</a></li>
+        <li class="role-admin"><a class="dropdown-item" href="#/employees">Employees</a></li>
+        <li class="role-admin"><a class="dropdown-item" href="#/accounts">Accounts</a></li>
+        <li class="role-admin"><a class="dropdown-item" href="#/departments">Departments</a></li>
+        <li><a class="dropdown-item" href="#/requests">My Requests</a></li>
+        <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Logout</a></li>
       </ul>
     </div>
-  </nav>
 
-  <div class="container mt-5">
-    <h1>Welcome to Full-Stack App</h1>
-    <p>A static prototype before backend integration. Simulates:</p>
+    <!-- Shown only when logged out -->
+    <div class="ms-auto role-logged-out">
+      <a href="#/login" class="btn btn-outline-light btn-sm me-2">Login</a>
+      <a href="#/register" class="btn btn-outline-light btn-sm">Register</a>
+    </div>
+  </div>
+</nav>
+
+
+
+
+  <!-- Dashboard Page -->
+  <div id="dashboard-page" class="page active container mt-5">
+    <h1>Welcome to Full-Stack App (Michael Silva)</h1>
+    <p>This prototype simulates:</p>
     <ul>
       <li>Email registration + fake verification</li>
       <li>Login with JWT-like token simulation</li>
       <li>Role-based UI (Admin/User)</li>
-      <li>CRUD for Employees, Departments, and Requests</li>
+      <li>CRUD for Employees, Departments, Requests</li>
     </ul>
-    <p class="note-banner">⚠️ All data is stored in <span class="highlight-pink">localStorage</span>. Refresh to reset.</p>
-    <a href="register.html" class="btn btn-primary">Get Started →</a>
+    <p><strong>Note:</strong> All data is stored in localStorage. Refreshing clears everything.</p>
+  <button class="btn btn-primary" onclick="navigateTo('register')">Get Started →</button>
   </div>
+
+  <!-- Other Pages -->
+  <div id="login-page" class="page container mt-5">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required class="form-control mb-2">
+      <input type="password" id="loginPassword" placeholder="Password" required class="form-control mb-2">
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+  </div>
+
+  <!-- Register Page -->
+<div id="register-page" class="page container mt-5">
+  <div class="card">
+    <div class="card-body">
+      <h2 class="card-title">Register Account</h2>
+      <form id="registerForm">
+        <div class="mb-3">
+          <label for="registerFirstName" class="form-label">First Name</label>
+          <input type="text" id="registerFirstName" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="registerLastName" class="form-label">Last Name</label>
+          <input type="text" id="registerLastName" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="registerEmail" class="form-label">Email</label>
+          <input type="email" id="registerEmail" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="registerPassword" class="form-label">Password</label>
+          <input type="password" id="registerPassword" class="form-control" required>
+        </div>
+        <div class="d-flex justify-content-between">
+          <button type="submit" class="btn btn-success">Sign Up</button>
+          <button type="button" class="btn btn-secondary" onclick="navigateTo('dashboard')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Verify Email Page -->
+<div id="verify-page" class="page container mt-5">
+  <div class="card">
+    <div class="card-body">
+      <div class="alert alert-success">
+        A verification link has been sent to <span id="verifyEmail"></span>.
+      </div>
+      <p>For demo purposes, click below to simulate verification:</p>
+      <div class="d-flex">
+        <button class="btn btn-success me-2" onclick="simulateVerification()">Simulate Email Verification</button>
+        <button class="btn btn-secondary" onclick="navigateTo('login')">Go to Login</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Verified Page -->
+<div id="verified-page" class="page container mt-5">
+  <div class="card">
+    <div class="card-body">
+      <div class="alert alert-success">
+        Email verified! You may now log in.
+      </div>
+      <h2 class="card-title">Login</h2>
+      <form id="verifiedLoginForm">
+        <div class="mb-3">
+          <label for="verifiedLoginEmail" class="form-label">Email</label>
+          <input type="email" id="verifiedLoginEmail" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="verifiedLoginPassword" class="form-label">Password</label>
+          <input type="password" id="verifiedLoginPassword" class="form-control" required>
+        </div>
+        <div class="d-flex justify-content-between">
+          <button type="submit" class="btn btn-primary">Login</button>
+          <button type="button" class="btn btn-secondary" onclick="navigateTo('dashboard')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Profile Page -->
+  <div id="profile-page" class="page container mt-5">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title">My Profile</h2>
+        <p id="profileName" class="mb-1">Admin User</p>
+        <p id="profileEmail" class="mb-1">Email: admin@gmail.com</p>
+        <p id="profileRole" class="mb-3">Role: Admin</p>
+        <button class="btn btn-primary">Edit Profile</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Admin Pages -->
+  <!-- Employees Page -->
+<div id="employees-page" class="page container mt-5">
+  <h2>Employees (Admin)</h2>
+
+  <!-- Add Employee button -->
+  <div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-success btn-sm" onclick="showEmployeeForm()">+ Add Employee</button>
+  </div>
+
+  <!-- Employee Table -->
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Dept</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="employeeTableBody">
+      <tr>
+        <td colspan="5" class="text-center">No employees</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Add/Edit Employee Form -->
+  <div id="employeeForm" class="card mt-4" style="display:none;">
+    <div class="card-body">
+      <h5 class="card-title">Add/Edit Employee</h5>
+      <form id="employeeFormFields">
+        <div class="mb-3">
+          <label for="empId" class="form-label">Employee ID</label>
+          <input type="text" id="empId" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="empEmail" class="form-label">User Email</label>
+          <input type="email" id="empEmail" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="empPosition" class="form-label">Position</label>
+          <input type="text" id="empPosition" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="empDept" class="form-label">Department</label>
+          <select id="empDept" class="form-select" required>
+            <option value="">-- Select Course --</option>
+            <option value="HR">HR</option>
+            <option value="IT">IT</option>
+            <option value="Finance">Finance</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="empHireDate" class="form-label">Hire Date</label>
+          <input type="text" id="empHireDate" class="form-control" placeholder="dd/mm/yyyy" required>
+        </div>
+        <div class="d-flex justify-content-between">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-secondary" onclick="hideEmployeeForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Accounts Page -->
+<div id="accounts-page" class="page container mt-5">
+  <h2>Accounts (Admin)</h2>
+
+  <!-- Add Account button -->
+  <div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-success btn-sm" onclick="showAccountForm()">+ Add Account</button>
+  </div>
+
+  <!-- Accounts Table -->
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Verified</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="accountTableBody">
+      <tr>
+        <td colspan="5" class="text-center">No accounts</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Add/Edit Account Form -->
+  <div id="accountForm" class="card mt-4" style="display:none;">
+    <div class="card-body">
+      <h5 class="card-title">Add/Edit Account</h5>
+      <form id="accountFormFields">
+        <div class="mb-3">
+          <label for="accFirstName" class="form-label">First Name</label>
+          <input type="text" id="accFirstName" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="accLastName" class="form-label">Last Name</label>
+          <input type="text" id="accLastName" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="accEmail" class="form-label">Email</label>
+          <input type="email" id="accEmail" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="accPassword" class="form-label">Password</label>
+          <input type="password" id="accPassword" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="accRole" class="form-label">Role</label>
+          <select id="accRole" class="form-select">
+            <option value="User" selected>User</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-check mb-3">
+          <input type="checkbox" id="accVerified" class="form-check-input">
+          <label for="accVerified" class="form-check-label">Verified</label>
+        </div>
+        <div class="d-flex">
+          <button type="submit" class="btn btn-primary me-2">Save</button>
+          <button type="button" class="btn btn-secondary" onclick="hideAccountForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Departments Page -->
+<div id="departments-page" class="page container mt-5">
+  <h2>Departments (Admin)</h2>
+
+  <!-- Add Department button -->
+  <div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-success btn-sm" onclick="showDeptForm()">+ Add Department</button>
+  </div>
+
+  <!-- Department Table -->
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="deptTableBody">
+      <tr>
+        <td colspan="3" class="text-center">No departments</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Add/Edit Department Form -->
+  <div id="deptForm" class="card mt-4" style="display:none;">
+    <div class="card-body">
+      <h5 class="card-title">Add/Edit Department</h5>
+      <form id="deptFormFields">
+        <div class="mb-3">
+          <label for="deptName" class="form-label">Department Name</label>
+          <input type="text" id="deptName" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="deptDesc" class="form-label">Description</label>
+          <input type="text" id="deptDesc" class="form-control" required>
+        </div>
+        <div class="d-flex">
+          <button type="submit" class="btn btn-primary" style="margin-right:5px;">Save</button>
+          <button type="button" class="btn btn-secondary" onclick="hideDeptForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Requests Page -->
+<div id="requests-page" class="page container mt-5">
+  <h2>My Requests</h2>
+
+  <!-- Add Request button -->
+  <div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#newRequestModal">+ New Request</button>
+  </div>
+
+  <!-- Requests Table -->
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Type</th>
+        <th>Items</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="requestTableBody">
+      <tr>
+        <td colspan="3" class="text-center">No requests</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- New Request Modal -->
+<div class="modal fade" id="newRequestModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New Request</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="requestForm">
+          <div class="mb-3">
+            <label for="reqType" class="form-label">Type</label>
+            <input type="text" id="reqType" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="reqItems" class="form-label">Items</label>
+            <input type="text" id="reqItems" class="form-control" placeholder="Item name, quantity" required>
+          </div>
+          <div class="d-flex">
+            <button type="submit" class="btn btn-primary me-2">Submit Request</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <!-- Request Modal -->
+  <div class="modal fade" id="newRequestModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">New Request</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="requestForm">
+            <div class="mb-2">
+              <label for="reqType" class="form-label">Type</label>
+              <input type="text" id="reqType" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label for="reqItems" class="form-label">Items</label>
+              <input type="text" id="reqItems" class="form-control" placeholder="Item name, quantity" required>
+            </div>
+            <div class="mt-3">
+              <button type="submit" class="btn btn-primary btn-sm">Submit Request</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+// Global user state
+let currentUser = null; // null = not logged in
+
+// Navigate by updating the hash
+function navigateTo(path) {
+  window.location.hash = "#/" + path;
+}
+
+// Handle routing logic
+function handleRouting() {
+  let hash = window.location.hash || "#/";
+  let route = hash.replace("#/", "");
+  let pageId = route ? route + "-page" : "dashboard-page";
+
+  // Hide all pages
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+
+  // Authentication checks
+  if (!currentUser) {
+    if (["profile", "employees", "accounts", "departments", "requests"].includes(route)) {
+      navigateTo("login");
+      pageId = "login-page";
+    }
+  } else {
+    if (currentUser.role !== "Admin" && ["employees", "accounts", "departments"].includes(route)) {
+      navigateTo("profile");
+      pageId = "profile-page";
+    }
+  }
+
+  // Show matching page
+  let page = document.getElementById(pageId);
+  if (page) {
+    page.classList.add("active");
+  }
+}
+
+// Listen for hash changes
+window.addEventListener("hashchange", handleRouting);
+
+// On page load
+window.addEventListener("load", () => {
+  if (!window.location.hash) {
+    navigateTo(""); // default dashboard
+  }
+  handleRouting();
+});
+
+// Basic login
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
+  // Check admin credentials
+  if (email === "admin@gmail.com" && password === "admin123") {
+    currentUser = { name: "Admin User", email: email, role: "Admin" };
+    document.body.className = "authenticated is-admin";
+  } else {
+    currentUser = { name: "User", email: email, role: "User" };
+    document.body.className = "authenticated";
+  }
+
+  document.getElementById("userRole").innerText = currentUser.role;
+  document.getElementById("profileName").innerText = "Name: " + currentUser.name;
+  document.getElementById("profileEmail").innerText = "Email: " + currentUser.email;
+  document.getElementById("profileRole").innerText = "Role: " + currentUser.role;
+  navigateTo("profile");
+});
+
+// Logout
+function logout() {
+  currentUser = null;
+  document.body.className = "not-authenticated";
+  document.getElementById("userRole").innerText = "Guest";
+  navigateTo("login");
+}
+
+// Register handler → go to verify page
+document.getElementById("registerForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  currentUser = {
+    name: document.getElementById("registerFirstName").value + " " + document.getElementById("registerLastName").value,
+    email: document.getElementById("registerEmail").value,
+    role: "User" // all registered accounts default to User
+  };
+  // Show verify page instead of profile
+  document.getElementById("verifyEmail").innerText = currentUser.email;
+  navigateTo("verify");
+});
+
+// Simulate verification → go to verified login page
+function simulateVerification() {
+  // Auto-fill email in verified login form
+  document.getElementById("verifiedLoginEmail").value = currentUser.email;
+  navigateTo("verified");
+}
+
+// Verified login handler
+document.getElementById("verifiedLoginForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  const email = document.getElementById("verifiedLoginEmail").value;
+  const password = document.getElementById("verifiedLoginPassword").value;
+
+  // Check admin credentials
+  if (email === "admin@gmail.com" && password === "admin123") {
+    currentUser = { name: "Admin User", email: email, role: "Admin" };
+    document.body.className = "authenticated is-admin";
+  } else {
+    currentUser = { name: currentUser.name || "User", email: email, role: "User" };
+    document.body.className = "authenticated";
+  }
+
+  document.getElementById("userRole").innerText = currentUser.role;
+  document.getElementById("profileName").innerText = "Name: " + currentUser.name;
+  document.getElementById("profileEmail").innerText = "Email: " + currentUser.email;
+  document.getElementById("profileRole").innerText = "Role: " + currentUser.role;
+  navigateTo("profile");
+});
+
+
+// =========================
+// Employees Page Logic
+// =========================
+
+// Show employee form
+function showEmployeeForm() {
+  document.getElementById("employeeForm").style.display = "block";
+}
+
+// Hide employee form
+function hideEmployeeForm() {
+  document.getElementById("employeeForm").style.display = "none";
+}
+
+// Handle employee form submission
+document.getElementById("employeeFormFields").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const id = document.getElementById("empId").value;
+  const email = document.getElementById("empEmail").value;
+  const position = document.getElementById("empPosition").value;
+  const dept = document.getElementById("empDept").value;
+  const hireDate = document.getElementById("empHireDate").value;
+
+  const tbody = document.getElementById("employeeTableBody");
+
+  // Remove "No employees" row if present
+  if (tbody.children.length === 1 && tbody.children[0].children[0].innerText === "No employees") {
+    tbody.innerHTML = "";
+  }
+
+  // Add new row
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${id}</td>
+    <td>${email}</td>
+    <td>${position}</td>
+    <td>${dept}</td>
+    <td>
+      <button class="btn btn-sm btn-warning" onclick="editEmployee(this)">Edit</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteEmployee(this)">Delete</button>
+    </td>
+  `;
+  tbody.appendChild(row);
+
+  hideEmployeeForm();
+  document.getElementById("employeeFormFields").reset();
+});
+
+// Edit employee
+function editEmployee(button) {
+  const row = button.closest("tr");
+  document.getElementById("empId").value = row.children[0].innerText;
+  document.getElementById("empEmail").value = row.children[1].innerText;
+  document.getElementById("empPosition").value = row.children[2].innerText;
+  document.getElementById("empDept").value = row.children[3].innerText;
+  // Hire date not stored in table, so leave blank
+  showEmployeeForm();
+  row.remove(); // remove old row so Save will add updated one
+}
+
+// Delete employee
+function deleteEmployee(button) {
+  const row = button.closest("tr");
+  row.remove();
+
+  const tbody = document.getElementById("employeeTableBody");
+  if (tbody.children.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center">No employees</td></tr>`;
+  }
+}
+
+// =========================
+// Accounts Page Logic
+// =========================
+
+// Show account form
+function showAccountForm() {
+  document.getElementById("accountForm").style.display = "block";
+}
+
+// Hide account form
+function hideAccountForm() {
+  document.getElementById("accountForm").style.display = "none";
+}
+
+// Handle account form submission
+document.getElementById("accountFormFields").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const firstName = document.getElementById("accFirstName").value;
+  const lastName = document.getElementById("accLastName").value;
+  const email = document.getElementById("accEmail").value;
+  const role = document.getElementById("accRole").value;
+  const verified = document.getElementById("accVerified").checked ? "✔" : "✖";
+
+  const tbody = document.getElementById("accountTableBody");
+
+  // Remove "No accounts" row if present
+  if (tbody.children.length === 1 && tbody.children[0].children[0].innerText === "No accounts") {
+    tbody.innerHTML = "";
+  }
+
+  // Add new row
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${firstName} ${lastName}</td>
+    <td>${email}</td>
+    <td>${role}</td>
+    <td>${verified}</td>
+    <td>
+      <button class="btn btn-sm btn-primary" onclick="editAccount(this)">Edit</button>
+      <button class="btn btn-sm btn-warning" onclick="resetPassword('${email}')">Reset Password</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteAccount(this)">Delete</button>
+    </td>
+  `;
+  tbody.appendChild(row);
+
+  hideAccountForm();
+  document.getElementById("accountFormFields").reset();
+});
+
+// Edit account
+function editAccount(button) {
+  const row = button.closest("tr");
+  const nameParts = row.children[0].innerText.split(" ");
+  document.getElementById("accFirstName").value = nameParts[0];
+  document.getElementById("accLastName").value = nameParts.slice(1).join(" ");
+  document.getElementById("accEmail").value = row.children[1].innerText;
+  document.getElementById("accRole").value = row.children[2].innerText;
+  document.getElementById("accVerified").checked = row.children[3].innerText === "✔";
+  showAccountForm();
+  row.remove(); // remove old row so Save will add updated one
+}
+
+// Reset password (demo only)
+function resetPassword(email) {
+  alert("Password reset link sent to " + email);
+}
+
+// Delete account
+function deleteAccount(button) {
+  const row = button.closest("tr");
+  row.remove();
+
+  const tbody = document.getElementById("accountTableBody");
+  if (tbody.children.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center">No accounts</td></tr>`;
+  }
+}
+
+// =========================
+// Departments Page Logic
+// =========================
+
+// Show department form
+function showDeptForm() {
+  document.getElementById("deptForm").style.display = "block";
+}
+
+// Hide department form
+function hideDeptForm() {
+  document.getElementById("deptForm").style.display = "none";
+}
+
+// Handle department form submission
+document.getElementById("deptFormFields").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("deptName").value;
+  const desc = document.getElementById("deptDesc").value;
+
+  const tbody = document.getElementById("deptTableBody");
+
+  // Remove "No departments" row if present
+  if (tbody.children.length === 1 && tbody.children[0].children[0].innerText === "No departments") {
+    tbody.innerHTML = "";
+  }
+
+  // Add new row
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${name}</td>
+    <td>${desc}</td>
+    <td>
+      <button class="btn btn-sm btn-primary" onclick="editDept(this)">Edit</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteDept(this)">Delete</button>
+    </td>
+  `;
+  tbody.appendChild(row);
+
+  hideDeptForm();
+  document.getElementById("deptFormFields").reset();
+});
+
+// Edit department
+function editDept(button) {
+  const row = button.closest("tr");
+  document.getElementById("deptName").value = row.children[0].innerText;
+  document.getElementById("deptDesc").value = row.children[1].innerText;
+  showDeptForm();
+  row.remove(); // remove old row so Save will add updated one
+}
+
+// Delete department
+function deleteDept(button) {
+  const row = button.closest("tr");
+  row.remove();
+
+  const tbody = document.getElementById("deptTableBody");
+  if (tbody.children.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" class="text-center">No departments</td></tr>`;
+  }
+}
+
+// =========================
+// Requests Page Logic
+// =========================
+
+// Handle request form submission
+document.getElementById("requestForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const type = document.getElementById("reqType").value;
+  const items = document.getElementById("reqItems").value;
+
+  const tbody = document.getElementById("requestTableBody");
+
+  // Remove "No requests" row if present
+  if (tbody.children.length === 1 && tbody.children[0].children[0].innerText === "No requests") {
+    tbody.innerHTML = "";
+  }
+
+  // Add new row
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${type}</td>
+    <td>${items}</td>
+    <td>
+      <button class="btn btn-sm btn-primary" onclick="editRequest(this)">Edit</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteRequest(this)">Delete</button>
+    </td>
+  `;
+  tbody.appendChild(row);
+
+  // Close modal
+  const modal = bootstrap.Modal.getInstance(document.getElementById("newRequestModal"));
+  modal.hide();
+
+  document.getElementById("requestForm").reset();
+});
+
+// Edit request
+function editRequest(button) {
+  const row = button.closest("tr");
+  document.getElementById("reqType").value = row.children[0].innerText;
+  document.getElementById("reqItems").value = row.children[1].innerText;
+
+  // Remove old row so Save will add updated one
+  row.remove();
+
+  // Show modal again
+  const modal = new bootstrap.Modal(document.getElementById("newRequestModal"));
+  modal.show();
+}
+
+// Delete request
+function deleteRequest(button) {
+  const row = button.closest("tr");
+  row.remove();
+
+  const tbody = document.getElementById("requestTableBody");
+  if (tbody.children.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" class="text-center">No requests</td></tr>`;
+  }
+}
+
+  </script>
 </body>
 </html>
