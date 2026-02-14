@@ -151,7 +151,7 @@ if (profileInfo) {
       "<p><strong>Email:</strong> " + account.email + "</p>" +
       "<p><strong>Role:</strong> " + account.role + "</p>" +
       '<button class="btn btn-primary btn-sm d-inline-flex align-items-center edit-btn">' +
-      '<i class="bi bi-pencil-square me-1"></i>Edit</button>';
+      '<i class="bi bi-pencil-square me-1"></i>Edit Profile</button>';
 
     var userRoleSpan = document.getElementById("userRole");
     if (userRoleSpan) {
@@ -162,12 +162,128 @@ if (profileInfo) {
   }
 }
 
+// ---------------- EMPLOYEES ----------------
+var employeeForm = document.getElementById("employeeForm");
+var employeeTableBody = document.getElementById("employeeTableBody");
+
+if (employeeForm && employeeTableBody) {
+  employeeForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    var empId = document.getElementById("empId").value.trim();
+    var empEmail = document.getElementById("empEmail").value.trim();
+    var empPosition = document.getElementById("empPosition").value.trim();
+    var empDept = document.getElementById("empDept").value.trim();
+    var empHireDate = document.getElementById("empHireDate").value;
+
+    // Save employee to localStorage
+    var employees = JSON.parse(localStorage.getItem("employees") || "[]");
+    employees.push({
+      id: empId,
+      email: empEmail,
+      position: empPosition,
+      dept: empDept,
+      hireDate: empHireDate
+    });
+    localStorage.setItem("employees", JSON.stringify(employees));
+
+    renderEmployees();
+    employeeForm.reset();
+  });
+
+  function renderEmployees() {
+    var employees = JSON.parse(localStorage.getItem("employees") || "[]");
+    if (employees.length === 0) {
+      employeeTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No employees</td></tr>';
+      return;
+    }
+    employeeTableBody.innerHTML = employees.map(emp => `
+      <tr>
+        <td>${emp.id}</td>
+        <td>${emp.email}</td>
+        <td>${emp.position}</td>
+        <td>${emp.dept}</td>
+        <td>
+          <button class="btn btn-sm btn-warning">Edit</button>
+          <button class="btn btn-sm btn-danger">Delete</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  renderEmployees();
+}
+
+// ---------------- DEPARTMENTS ----------------
+var deptForm = document.getElementById("deptForm");
+var deptTableBody = document.getElementById("deptTableBody");
+
+if (deptForm && deptTableBody) {
+  deptForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    var deptName = document.getElementById("deptName").value;
+    var deptDesc = document.getElementById("deptDesc").value;
+
+    var departments = JSON.parse(localStorage.getItem("departments") || "[]");
+    departments.push({ name: deptName, description: deptDesc });
+    localStorage.setItem("departments", JSON.stringify(departments));
+
+    renderDepartments();
+    deptForm.reset();
+  });
+
+  function renderDepartments() {
+    var departments = JSON.parse(localStorage.getItem("departments") || "[]");
+    if (departments.length === 0) {
+      deptTableBody.innerHTML = '<tr><td colspan="3" class="text-center">No departments</td></tr>';
+      return;
+    }
+    deptTableBody.innerHTML = "";
+    departments.forEach(function(dept, index) {
+      var row = "<tr>" +
+        "<td>" + dept.name + "</td>" +
+        "<td>" + dept.description + "</td>" +
+        "<td>" +
+          "<div class='d-flex gap-2'>" +
+            "<button class='btn btn-sm btn-primary' onclick='editDepartment(" + index + ")'>Edit</button>" +
+            "<button class='btn btn-sm btn-danger' onclick='deleteDepartment(" + index + ")'>Delete</button>" +
+          "</div>" +
+        "</td>" +
+      "</tr>";
+      deptTableBody.innerHTML += row;
+    });
+  }
+
+  window.editDepartment = function(index) {
+    var departments = JSON.parse(localStorage.getItem("departments") || "[]");
+    var dept = departments[index];
+    document.getElementById("deptName").value = dept.name;
+    document.getElementById("deptDesc").value = dept.description;
+    // Remove old entry so Save overwrites
+    departments.splice(index, 1);
+    localStorage.setItem("departments", JSON.stringify(departments));
+    renderDepartments();
+  };
+
+  window.deleteDepartment = function(index) {
+    var departments = JSON.parse(localStorage.getItem("departments") || "[]");
+    departments.splice(index, 1);
+    localStorage.setItem("departments", JSON.stringify(departments));
+    renderDepartments();
+  };
+
+  renderDepartments();
+}
+
 
 // ---------------- LOGOUT ----------------
 var logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
   logoutBtn.addEventListener("click", function() {
+    // Clear logged-in user
     localStorage.removeItem("logged_in_user");
-    window.location.href = "index.html"; // back to dashboard
+    // Redirect to dashboard (index.html) with no account logged in
+    window.location.href = "index.html";
   });
 }
